@@ -54,7 +54,7 @@ def main(save_sample, save_categories):
     with open (path2reviews, 'r') as f:
         for line in f.readlines():
             review_json = json.loads(line)
-            if review_json['business_id'] in restaurant_ids:
+            if review_json['business_id'] in restaurant_ids and review_json['stars'] in [1,2,5]:  #TODO add filter to 1-2 and 5 stars
                 if review_json['business_id'] in rest2revID:
                     rest2revID[ review_json['business_id'] ].append(review_json['review_id'])
                 else:
@@ -81,7 +81,7 @@ def main(save_sample, save_categories):
     #x = range(nz_count)
     print("sampling categories")
     sample_rid2cat={}
-    sample_size = 10 #len(valid_cats) # This specifies how many cuisines you would like to save 
+    sample_size = 1 #len(valid_cats) # This specifies how many cuisines you would like to save
                                   # if this process takes too long you can change it to something smaller like 5, 6 ...
     cat_sample = random.sample(valid_cats, sample_size)
     for cat in cat_sample:
@@ -103,7 +103,7 @@ def main(save_sample, save_categories):
         for line in f.readlines():
             review_json = json.loads(line)
             rid = review_json['business_id']
-            if rid in sample_rid2cat:
+            if rid in sample_rid2cat and review_json['stars'] in [1,2,5]:
                 for rcat in sample_rid2cat [ rid ]:
                     num_reviews = num_reviews + 1
                     if rcat in sample_cat2reviews:
@@ -112,7 +112,8 @@ def main(save_sample, save_categories):
                     else:
                         sample_cat2reviews [ rcat ] = [review_json['text']]
                         sample_cat2ratings [ rcat ] = [ str(review_json['stars']) ]
-    
+    print('Number of reviews:')
+    print(num_reviews)
     if save_categories:
         print("saving categories")
         #save categories
@@ -131,7 +132,6 @@ def main(save_sample, save_categories):
         count = 0
         max_bound = 0
         for cat in sample_cat2reviews:
-            print(cat)
             new_max_bound = max_bound + len(sample_cat2reviews[cat])
             while count < sample_size and sorted_rev_sample[count] < new_max_bound:
                 my_sample_v2.append( sample_cat2reviews[cat][ sorted_rev_sample[count] - max_bound ].replace("\n", " ").strip() )
@@ -142,6 +142,7 @@ def main(save_sample, save_categories):
             #    my_sample.append(rev.replace("\n", " ").strip())
             #count = count + 1
 
+        print(my_sample_v2)
         with open ("review_sample_100000.txt", 'wb') as f:
             f.write('\n'.join(my_sample_v2).encode('ascii','ignore') )
             
